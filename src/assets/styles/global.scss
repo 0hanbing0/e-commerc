@@ -1,0 +1,105 @@
+// CSS 变量 —— 全局设计系统，所有颜色在此定义，硬编码颜色禁止出现在组件中
+:root {
+  --bg-primary: #0c1929;
+  --bg-card: rgba(18, 32, 58, 0.92);
+  --bg-card-hover: rgba(26, 44, 74, 0.95);
+  --border-card: rgba(0, 212, 255, 0.12);
+  --border-active: rgba(0, 212, 255, 0.4);
+  --text-primary: #e0e8f0;
+  --text-secondary: #8899b4;
+  --accent-cyan: #00d4ff;
+  --accent-green: #00ff88;
+  --accent-red: #ff6b6b;
+  --accent-yellow: #ffd93d;
+  --accent-purple: #a78bfa;
+  --gradient-card: linear-gradient(180deg, rgba(0, 212, 255, 0.04) 0%, rgba(0, 212, 255, 0.01) 100%);
+}
+
+// 全局 reset
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  overflow: hidden;
+}
+
+// 卡片通用样式 —— 所有图表容器共用
+.dash-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 4px;
+  padding: 16px;
+  position: relative;
+  transition: all 0.3s ease;
+
+  // 卡片顶部发光边框线
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+    opacity: 0.5;
+  }
+
+  &:hover {
+    border-color: var(--border-active);
+    background: var(--bg-card-hover);
+  }
+
+  // 卡片标题通用样式
+  .card-title {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    // 标题左侧小蓝条
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 14px;
+      background: var(--accent-cyan);
+      border-radius: 2px;
+    }
+  }
+}
+
+// 数据高亮色
+.data-highlight {
+  color: var(--accent-cyan);
+  font-weight: bold;
+}
+
+// 涨/跌色
+.data-up {
+  color: var(--accent-green);
+}
+.data-down {
+  color: var(--accent-red);
+}
+
+// 自定义深色滚动条
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.2);
+  border-radius: 2px;
+}
