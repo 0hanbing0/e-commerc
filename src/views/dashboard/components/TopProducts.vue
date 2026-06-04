@@ -1,17 +1,34 @@
 <script setup lang="ts">
 import { useDashboardStore } from '@/stores'
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 
 const store = useDashboardStore()
-const { topProducts } = storeToRefs(store)
+const { topProducts, loading, error, lastUpdated } = storeToRefs(store)
+
+const isEmpty = computed(() => !loading.value && topProducts.value.length === 0 && !error.value)
 </script>
 
 <template>
   <div class="dash-card chart-box">
     <div class="card-title">热销 TOP10</div>
-    <div class="rank-list">
+
+    <!-- 加载骨架 -->
+    <div v-if="loading && !lastUpdated" class="rank-list">
+      <div v-for="i in 5" :key="i" class="rank-item">
+        <div class="skel-line" style="width:80%"></div>
+      </div>
+    </div>
+
+    <!-- 加载错误 -->
+    <div v-else-if="error" class="empty-state error-text">数据加载失败</div>
+
+    <!-- 空数据 -->
+    <div v-else-if="isEmpty" class="empty-state">暂无排行数据</div>
+
+    <!-- 正常列表 -->
+    <div v-else class="rank-list">
       <div v-for="p in topProducts" :key="p.rank" class="rank-item">
-        <!-- 前三名高亮序号 -->
         <span class="rank-num" :class="{ top3: p.rank <= 3 }">{{ p.rank }}</span>
         <span class="rank-name">{{ p.name }}</span>
         <span class="rank-sales">¥{{ (p.sales / 10000).toFixed(1) }}万</span>
@@ -88,5 +105,22 @@ const { topProducts } = storeToRefs(store)
   min-width: 52px;
   text-align: right;
   font-size: 11px;
+}
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.error-text {
+  color: var(--accent-red);
+}
+
+.skel-line {
+  height: 12px;
 }
 </style>

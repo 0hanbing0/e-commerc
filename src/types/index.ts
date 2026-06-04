@@ -1,5 +1,6 @@
 // 仪表盘所有数据结构的类型定义
-// 作用：组件、Store、Mock 数据全部引用这些接口，改一个字段 TS 全链路报错
+
+// ===== 业务数据类型 =====
 
 /** 销售趋势 - 折线图 */
 export interface SalesTrendItem {
@@ -60,9 +61,23 @@ export interface ScrollingItem {
   time: string
 }
 
-/** 统一 API 响应格式，T 为具体数据类型 */
+// ===== API 类型 =====
+
+/** 统一 API 响应格式 */
 export interface ApiResponse<T = unknown> {
   code: number
   message: string
   data: T
 }
+
+// ===== 错误类型 =====
+
+/** 请求错误 —— 拦截器统一包装后抛出 */
+export interface RequestError {
+  code: number
+  message: string
+  data: unknown
+}
+
+/** 图表组件状态 */
+export type ChartStatus = 'loading' | 'success' | 'error' | 'empty'

@@ -1,59 +1,53 @@
 <script setup lang="ts">
 import { useDashboardStore } from '@/stores'
 import { storeToRefs } from 'pinia'
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
 
 const store = useDashboardStore()
-const { scrollingLogs } = storeToRefs(store)
-const containerRef = ref<HTMLDivElement>()
-let scrollTimer: number
-let isPaused = false
+const { scrollingLogs, loading, error, lastUpdated } = storeToRefs(store)
+const isPaused = ref(false)
 
-const pauseScroll = () => {
-  isPaused = true
-}
-const resumeScroll = () => {
-  isPaused = false
-}
+const isEmpty = computed(() => !loading.value && scrollingLogs.value.length === 0 && !error.value)
 
-// 定时器驱动 scrollTop 自增实现自动滚动
-// 滚动到底部时归零，配合数据副本实现视觉"无缝"
-onMounted(() => {
-  const step = () => {
-    if (!containerRef.value || isPaused) return
-    const el = containerRef.value
-    el.scrollTop += 0.5
-    if (el.scrollTop >= el.scrollHeight - el.clientHeight) {
-      el.scrollTop = 0
-    }
-  }
-  // 40ms 间隔 ≈ 25fps，兼顾流畅度和性能
-  scrollTimer = window.setInterval(step, 40)
-})
-
-onUnmounted(() => clearInterval(scrollTimer))
+const pauseScroll = () => { isPaused.value = true }
+const resumeScroll = () => { isPaused.value = false }
 </script>
 
 <template>
   <div class="dash-card chart-box">
     <div class="card-title">实时事件</div>
-    <!-- 鼠标悬停暂停滚动，离开恢复 -->
+
+    <!-- 加载骨架 -->
+    <div v-if="loading && !lastUpdated" class="scroll-container static">
+      <div v-for="i in 4" :key="i" class="scroll-item">
+        <div class="skel-line" style="width:90%"></div>
+      </div>
+    </div>
+
+    <!-- 加载错误 -->
+    <div v-else-if="error" class="empty-state error-text">数据加载失败</div>
+
+    <!-- 空数据 -->
+    <div v-else-if="isEmpty" class="empty-state">暂无实时事件</div>
+
+    <!-- 正常滚动 -->
     <div
-      ref="containerRef"
+      v-else
       class="scroll-container"
       @mouseenter="pauseScroll"
       @mouseleave="resumeScroll"
     >
-      <div v-for="log in scrollingLogs" :key="log.id" class="scroll-item">
-        <span class="scroll-event">{{ log.event }}</span>
-        <span class="scroll-detail">{{ log.detail }}</span>
-        <span class="scroll-time">{{ log.time }}</span>
-      </div>
-      <!-- 数据副本：原数据滚完时无缝衔接，消除视觉跳跃 -->
-      <div v-for="log in scrollingLogs" :key="`dup-${log.id}`" class="scroll-item">
-        <span class="scroll-event">{{ log.event }}</span>
-        <span class="scroll-detail">{{ log.detail }}</span>
-        <span class="scroll-time">{{ log.time }}</span>
+      <div class="scroll-track" :class="{ paused: isPaused }">
+        <div v-for="log in scrollingLogs" :key="log.id" class="scroll-item">
+          <span class="scroll-event">{{ log.event }}</span>
+          <span class="scroll-detail">{{ log.detail }}</span>
+          <span class="scroll-time">{{ log.time }}</span>
+        </div>
+        <div v-for="log in scrollingLogs" :key="`dup-${log.id}`" class="scroll-item">
+          <span class="scroll-event">{{ log.event }}</span>
+          <span class="scroll-detail">{{ log.detail }}</span>
+          <span class="scroll-time">{{ log.time }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -69,8 +63,25 @@ onUnmounted(() => clearInterval(scrollTimer))
 
 .scroll-container {
   flex: 1;
-  overflow-y: hidden; // 隐藏滚动条，由 JS 控制滚动
+  overflow-y: hidden;
   min-height: 0;
+
+  &.static {
+    overflow-y: visible;
+  }
+}
+
+.scroll-track {
+  animation: scrollUp 25s linear infinite;
+
+  &.paused {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes scrollUp {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
 }
 
 .scroll-item {
@@ -97,5 +108,22 @@ onUnmounted(() => clearInterval(scrollTimer))
   color: var(--text-secondary);
   font-family: monospace;
   font-size: 11px;
+}
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.error-text {
+  color: var(--accent-red);
+}
+
+.skel-line {
+  height: 12px;
 }
 </style>

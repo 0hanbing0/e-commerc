@@ -1,33 +1,27 @@
 import * as echarts from 'echarts/core'
-// 按需引入图表类型 —— 不用的类型不会打进包
-import { LineChart, PieChart, BarChart, RadarChart } from 'echarts/charts'
+import { LineChart, PieChart, RadarChart } from 'echarts/charts'
 import {
-  TitleComponent,
   TooltipComponent,
   LegendComponent,
   GridComponent,
-  DataZoomComponent,
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
+import { ref, onUnmounted } from 'vue'
+import type { ChartStatus } from '@/types'
 
-// 手动注册：只打包实际使用的图表和组件
-// 对比全量 import * as echarts from 'echarts' 可减少约 60% 体积
 echarts.use([
   LineChart,
   PieChart,
-  BarChart,
   RadarChart,
-  TitleComponent,
   TooltipComponent,
   LegendComponent,
   GridComponent,
-  DataZoomComponent,
   CanvasRenderer,
 ])
 
 export { echarts }
 
-// 全局图表配色方案 —— 所有图表组件共享，修改一处全部生效
+// 全局图表配色方案
 export const baseChartColors = [
   '#00d4ff',
   '#00ff88',
@@ -38,3 +32,66 @@ export const baseChartColors = [
   '#f472b6',
   '#60a5fa',
 ]
+
+// 通用 tooltip 暗色主题
+export const darkTooltip = {
+  backgroundColor: 'rgba(12,22,46,0.95)',
+  borderColor: 'rgba(0,212,255,0.3)',
+  textStyle: { color: '#e0e8f0', fontSize: 12 },
+}
+
+// ===== 图表管理 composable =====
+// 封装 init / setOption / resize / dispose 生命周期
+export const useChart = () => {
+  const chartRef = ref<HTMLDivElement>()
+  const status = ref<ChartStatus>('loading')
+  let chart: echarts.ECharts | null = null
+  let resizeHandler: (() => void) | null = null
+
+  const init = (): echarts.ECharts | null => {
+    if (!chartRef.value) return null
+
+    // 移除旧监听器，避免内存泄漏
+    if (resizeHandler) {
+      window.removeEventListener('resize', resizeHandler)
+    }
+    if (chart) chart.dispose()
+
+    chart = echarts.init(chartRef.value)
+    resizeHandler = () => chart?.resize()
+    window.addEventListener('resize', resizeHandler)
+    return chart
+  }
+
+  const setOption = (option: echarts.EChartsCoreOption) => {
+    if (!chart) return
+    chart.setOption(option, { notMerge: false })
+    status.value = 'success'
+  }
+
+  const showError = () => {
+    status.value = 'error'
+  }
+
+  const showEmpty = () => {
+    status.value = 'empty'
+  }
+
+  onUnmounted(() => {
+    if (resizeHandler) {
+      window.removeEventListener('resize', resizeHandler)
+    }
+    chart?.dispose()
+    chart = null
+  })
+
+  return {
+    chartRef,
+    status,
+    init,
+    setOption,
+    showError,
+    showEmpty,
+    getInstance: () => chart,
+  }
+}

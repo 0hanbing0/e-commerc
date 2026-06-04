@@ -12,8 +12,7 @@
   --accent-red: #ff6b6b;
   --accent-yellow: #ffd93d;
   --accent-purple: #a78bfa;
-  --gradient-card: linear-gradient(180deg, rgba(0, 212, 255, 0.04) 0%, rgba(0, 212, 255, 0.01) 100%);
-}
+  }
 
 // 全局 reset
 * {
@@ -38,6 +37,7 @@ html, body, #app {
   border-radius: 4px;
   padding: 16px;
   position: relative;
+  overflow: hidden;
   transition: all 0.3s ease;
 
   // 卡片顶部发光边框线
@@ -78,12 +78,6 @@ html, body, #app {
   }
 }
 
-// 数据高亮色
-.data-highlight {
-  color: var(--accent-cyan);
-  font-weight: bold;
-}
-
 // 涨/跌色
 .data-up {
   color: var(--accent-green);
@@ -102,4 +96,62 @@ html, body, #app {
 ::-webkit-scrollbar-thumb {
   background: rgba(0, 212, 255, 0.2);
   border-radius: 2px;
+}
+
+// Firefox 滚动条
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 212, 255, 0.2) transparent;
+}
+
+// ===== 共享组件样式 =====
+
+// loading spinner
+.spinner {
+  width: 28px; height: 28px;
+  border: 2px solid rgba(0, 212, 255, 0.2);
+  border-top-color: var(--accent-cyan);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// 骨架屏
+.skel-line {
+  height: 14px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+  background-size: 200% 100%;
+  border-radius: 3px;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// 图表覆盖层
+.chart-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  background: var(--bg-card);
+  border-radius: 4px;
+}
+
+// 重试按钮
+.btn-retry {
+  padding: 4px 16px;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 3px;
+  color: var(--accent-cyan);
+  font-size: 12px;
+  cursor: pointer;
+  &:hover { background: rgba(0, 212, 255, 0.2); }
 }

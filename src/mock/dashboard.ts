@@ -11,9 +11,9 @@ import type {
 // 所有模拟数据集中管理，方便后续替换为真实接口
 // 数据格式由 @/types 接口约束，写错字段编译时报错
 
-/** 销售趋势 - 生成 30 个时间点模拟 24h 数据 */
-export const salesTrendData: SalesTrendItem[] = Array.from({ length: 30 }, (_, i) => ({
-  date: `${String(i + 1).padStart(2, '0')}:00`,
+/** 销售趋势 - 生成 24 个时间点模拟全天数据 */
+export const salesTrendData: SalesTrendItem[] = Array.from({ length: 24 }, (_, i) => ({
+  date: `${String(i).padStart(2, '0')}:00`,
   amount: Math.floor(50000 + Math.random() * 80000),
   orderCount: Math.floor(200 + Math.random() * 600),
 }))
@@ -88,3 +88,37 @@ export const scrollingData: ScrollingItem[] = [
   { id: 7, event: '物流异常', detail: '订单 DD20240521056 物流超时 48h', time: '14:24:28' },
   { id: 8, event: '好评', detail: '商品 MacBook Pro 14 获 100 字好评', time: '14:24:42' },
 ]
+
+/** 品类子类目数据，用于饼图下钻 */
+export const categorySubData: Record<string, { name: string; value: number; growth: number }[]> = {
+  '数码电子': [
+    { name: '智能手机', value: 45, growth: 15.2 },
+    { name: '笔记本电脑', value: 28, growth: 8.7 },
+    { name: '耳机音箱', value: 15, growth: -2.3 },
+    { name: '智能穿戴', value: 12, growth: 22.1 },
+  ],
+  '服饰鞋包': [
+    { name: '运动鞋', value: 35, growth: -5.8 },
+    { name: '女装', value: 30, growth: 12.3 },
+    { name: '男装', value: 20, growth: 3.1 },
+    { name: '箱包', value: 15, growth: -8.2 },
+  ],
+  '美妆个护': [
+    { name: '护肤品', value: 40, growth: 18.5 },
+    { name: '彩妆', value: 30, growth: -1.2 },
+    { name: '香水', value: 18, growth: 5.6 },
+    { name: '个人护理', value: 12, growth: 9.8 },
+  ],
+  '食品生鲜': [
+    { name: '休闲零食', value: 35, growth: 8.2 },
+    { name: '生鲜水果', value: 28, growth: 22.5 },
+    { name: '乳饮酒水', value: 22, growth: -3.1 },
+    { name: '粮油调味', value: 15, growth: 5.7 },
+  ],
+  '家居家装': [
+    { name: '家纺', value: 32, growth: 1.5 },
+    { name: '灯具', value: 25, growth: -6.3 },
+    { name: '收纳', value: 23, growth: 12.8 },
+    { name: '家具', value: 20, growth: -2.1 },
+  ],
+}

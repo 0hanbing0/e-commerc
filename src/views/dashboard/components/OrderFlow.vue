@@ -1,16 +1,33 @@
 <script setup lang="ts">
 import { useDashboardStore } from '@/stores'
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 
 const store = useDashboardStore()
-const { orderFlow } = storeToRefs(store)
+const { orderFlow, loading, error, lastUpdated } = storeToRefs(store)
+
+const isEmpty = computed(() => !loading.value && orderFlow.value.length === 0 && !error.value)
 </script>
 
 <template>
   <div class="dash-card chart-box">
     <div class="card-title">实时订单流</div>
-    <!-- 列表超长自动纵向滚动 -->
-    <div class="flow-list">
+
+    <!-- 加载骨架 -->
+    <div v-if="loading && !lastUpdated" class="flow-list">
+      <div v-for="i in 5" :key="i" class="flow-item">
+        <div class="skel-line" style="width:60%"></div>
+      </div>
+    </div>
+
+    <!-- 加载错误 -->
+    <div v-else-if="error" class="empty-state error-text">数据加载失败</div>
+
+    <!-- 空数据 -->
+    <div v-else-if="isEmpty" class="empty-state">暂无订单数据</div>
+
+    <!-- 正常列表 -->
+    <div v-else class="flow-list">
       <div v-for="o in orderFlow" :key="o.id" class="flow-item">
         <span class="flow-id">{{ o.id }}</span>
         <span class="flow-product">{{ o.product }}</span>
@@ -89,5 +106,22 @@ const { orderFlow } = storeToRefs(store)
   font-family: monospace;
   min-width: 64px;
   text-align: right;
+}
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.error-text {
+  color: var(--accent-red);
+}
+
+.skel-line {
+  height: 12px;
 }
 </style>

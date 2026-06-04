@@ -1,18 +1,80 @@
 import request from '@/utils/request'
-import type { ApiResponse, DashboardSummary } from '@/types'
+import type {
+  DashboardSummary,
+  SalesTrendItem,
+  CategoryItem,
+  OrderItem,
+  UserProfileItem,
+  TopProductItem,
+  ScrollingItem,
+} from '@/types'
+import {
+  summaryData,
+  salesTrendData,
+  categoryData,
+  orderFlowData,
+  userProfileData,
+  topProductsData,
+  scrollingData,
+} from '@/mock/dashboard'
 
-// API 层 —— 目前仅定义结构，实际数据走 mock
-// 后端就绪后，在 Store 的 refresh 中调用这些方法替换 mock 即可
+const useMock = (): boolean => import.meta.env.VITE_USE_MOCK !== 'false'
 
-export const getDashboardSummary = () =>
-  request.get<ApiResponse<DashboardSummary>>('/dashboard/summary')
+// 模拟延迟，模拟网络请求耗时
+const delay = (ms = 200) => new Promise<void>((r) => setTimeout(r, ms))
 
-export const getSalesTrend = () => request.get<ApiResponse>('/dashboard/sales-trend')
+export const getDashboardSummary = async (): Promise<DashboardSummary> => {
+  if (useMock()) {
+    await delay()
+    return { ...summaryData }
+  }
+  return request.get<unknown, DashboardSummary>('/dashboard/summary')
+}
 
-export const getCategoryData = () => request.get<ApiResponse>('/dashboard/category')
+export const getSalesTrend = async (params?: Record<string, string>): Promise<SalesTrendItem[]> => {
+  if (useMock()) {
+    await delay()
+    return [...salesTrendData]
+  }
+  return request.get<unknown, SalesTrendItem[]>('/dashboard/sales-trend', { params })
+}
 
-export const getOrderFlow = () => request.get<ApiResponse>('/dashboard/order-flow')
+export const getCategoryData = async (): Promise<CategoryItem[]> => {
+  if (useMock()) {
+    await delay()
+    return [...categoryData]
+  }
+  return request.get<unknown, CategoryItem[]>('/dashboard/category')
+}
 
-export const getUserProfile = () => request.get<ApiResponse>('/dashboard/user-profile')
+export const getOrderFlow = async (params?: Record<string, string>): Promise<OrderItem[]> => {
+  if (useMock()) {
+    await delay(150)
+    return [...orderFlowData]
+  }
+  return request.get<unknown, OrderItem[]>('/dashboard/order-flow', { params })
+}
 
-export const getTopProducts = () => request.get<ApiResponse>('/dashboard/top-products')
+export const getUserProfile = async (): Promise<UserProfileItem[]> => {
+  if (useMock()) {
+    await delay()
+    return [...userProfileData]
+  }
+  return request.get<unknown, UserProfileItem[]>('/dashboard/user-profile')
+}
+
+export const getTopProducts = async (params?: Record<string, string>): Promise<TopProductItem[]> => {
+  if (useMock()) {
+    await delay()
+    return [...topProductsData]
+  }
+  return request.get<unknown, TopProductItem[]>('/dashboard/top-products', { params })
+}
+
+export const getScrollingLogs = async (): Promise<ScrollingItem[]> => {
+  if (useMock()) {
+    await delay(150)
+    return [...scrollingData]
+  }
+  return request.get<unknown, ScrollingItem[]>('/dashboard/scrolling-logs')
+}
